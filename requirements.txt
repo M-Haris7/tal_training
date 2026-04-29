@@ -1,0 +1,5 @@
+jsonlines 
+huggingface_hub 
+tqdm
+causal-conv1d>=1.2.0
+mamba-ssm
