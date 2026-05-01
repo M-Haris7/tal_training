@@ -1,10 +1,5 @@
---extra-index-url https://download.pytorch.org/whl/cu124
-
-torch==2.4.1+cu124
-torchvision==0.19.1+cu124
-torchaudio==2.4.1+cu124
 jsonlines
 huggingface_hub
 tqdm
-causal-conv1d>=1.2.0
-mamba-ssm
+einops
+transformers
