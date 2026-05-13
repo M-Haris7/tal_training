@@ -1,0 +1,120 @@
+# =============================================================================
+# Hybrid BiMamba-Transformer Configuration for THUMOS14
+# Based on ActionFormer framework with novel hybrid temporal encoder
+# =============================================================================
+
+dataset:
+  name: thumos14
+  num_classes: 20
+  # I3D features (same as paper)
+  feat_folder: ./data/thumos14/i3d_features
+  json_file: ./data/thumos14/annotations/thumos14_anno.json
+  feat_stride: 4
+  num_frames: 16
+  input_dim: 2048
+  # Max sequence length (same as paper: 2304 time steps)
+  max_seq_len: 2304
+  # Downsample rate for feature extraction
+  downsample_rate: 1
+  # Crop or pad to max_seq_len
+  force_upsampling: false
+
+model:
+  # Feature embedding
+  embd_dim: 512
+  embd_kernel_size: 3
+  embd_with_ln: true
+  
+  # Multi-scale encoder levels (6 levels as in ActionFormer)
+  num_levels: 6
+  # Scale factor between levels
+  scale_factor: 2
+  
+  # Temporal feature encoder type: "bimamba_transformer"
+  encoder_type: bimamba_transformer
+  
+  # BiMamba branch config
+  mamba_d_state: 16
+  mamba_d_conv: 4
+  mamba_expand: 2
+  
+  # Transformer branch config  
+  n_head: 4
+  # Use sliding window attention to reduce complexity
+  use_window_attn: true
+  window_size: 19
+  
+  # Hybrid fusion
+  fusion_type: gated  # "gated", "add", "concat"
+  
+  # Number of encoder blocks per level
+  n_mamba_blocks: 1
+  
+  # Dropout
+  dropout: 0.0
+  attn_dropout: 0.0
+  
+  # Classification head
+  head_dim: 512
+  head_kernel_size: 3
+  head_num_layers: 3
+  head_with_ln: true
+  
+  # Prior probability for focal loss
+  prior_prob: 0.01
+  
+  # Regression range for each level
+  regression_range:
+    - [0, 4]
+    - [4, 8]
+    - [8, 16]
+    - [16, 32]
+    - [32, 64]
+    - [64, 10000]
+
+training:
+  # Optimizer (Adam, same as paper)
+  optimizer: adam
+  learning_rate: 0.0001
+  weight_decay: 0.05
+  
+  # Warmup (same as paper)
+  warmup: true
+  warmup_epochs: 5
+  
+  # Training epochs
+  epochs: 30
+  batch_size: 2
+  
+  # Loss weights
+  cls_loss_weight: 1.0
+  reg_loss_weight: 1.0
+  
+  # Gradient clipping
+  clip_grad_norm: 1.0
+  
+  # Learning rate schedule
+  schedule_type: cosine
+  
+  # Random seed
+  seed: 42
+
+inference:
+  # Pre-filtering threshold
+  pre_nms_thresh: 0.001
+  pre_nms_topk: 2000
+  # Soft-NMS (same as paper)
+  nms_method: soft_nms
+  nms_threshold: 0.4
+  nms_sigma: 0.5
+  # Post-NMS
+  max_seg_num: 200
+  min_score: 0.001
+  # Multiclass NMS
+  multiclass_nms: true
+  # Duration threshold
+  duration_thresh: 0.05
+
+eval:
+  # tIoU thresholds for THUMOS14: [0.3:0.1:0.7]
+  tiou_thresholds: [0.3, 0.4, 0.5, 0.6, 0.7]
